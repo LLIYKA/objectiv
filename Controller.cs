@@ -19,7 +19,7 @@ class Controller
         {
             Room = 1,
             Price = 1000,
-            Link = "LocalHost?"
+            Link = "bb?"
         });
         return apartments.ToArray();
     }
@@ -29,36 +29,36 @@ class Controller
         var medians = new List<Median>();
         medians.Add(new Median
         {
-            Date = new DateTime(1990, 01, 01),
+            Date = new DateTime(1990, 01, 01).ToShortDateString(),
             Price = 100
         });
         medians.Add(new Median
         {
-            Date = new DateTime(1990, 02, 01),
+            Date = new DateTime(1990, 02, 01).ToShortDateString(),
             Price = 200
         });
 
         medians.Add(new Median
         {
-            Date = new DateTime(1990, 03, 01),
+            Date = new DateTime(1990, 03, 01).ToShortDateString(),
             Price = 300
         });
 
         medians.Add(new Median
         {
-            Date = new DateTime(1990, 04, 01),
+            Date = new DateTime(1990, 04, 01).ToShortDateString(),
             Price = 400
         });
 
         medians.Add(new Median
         {
-            Date = new DateTime(1990, 05, 01),
+            Date = new DateTime(1990, 05, 01).ToShortDateString(),
             Price = 500
         });
 
         medians.Add(new Median
         {
-            Date = new DateTime(1990, 06, 01),
+            Date = new DateTime(1990, 06, 01).ToShortDateString(),
             Price = 600
         });
 
@@ -76,5 +76,5 @@ public class Apartment
 public class Median
 {
     public decimal Price { get; set; }
-    public DateTime Date { get; set; }
+    public string Date { get; set; }
 }
