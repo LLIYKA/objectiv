@@ -23,6 +23,14 @@ class Controller
         });
         return apartments.ToArray();
     }
+    public int[] GetFilterValues()
+    {
+        var values = new List<int>();
+        values.Add(1);
+        values.Add(2);
+        values.Add(3);
+        return values.ToArray();
+    }
 
     public Median[] GetMedian(int? roomCount)
     {

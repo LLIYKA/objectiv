@@ -7,6 +7,7 @@ class Objective extends React.Component {
         this.state = {
             apartments: [],
             medians: [],
+            filterValues: [],
             options: {
                 chart: {
                     id: 'apexchart-example',
@@ -14,18 +15,23 @@ class Objective extends React.Component {
                     type: 'line'
                 },
                 xaxis: {
-                    categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999]
+                    categories: []
                 }
             },
             series: [{
-                name: 'series-1',
-                data: [30, 40, 35, 50, 49, 60, 70, 91, 125]
+                name: '',
+                data: []
             }]
         };
     }
 
     componentDidMount() {
-        fetch("http://localhost:5150/")
+        this.refreshInfo();
+    }
+
+    refreshInfo(roomCount) {
+        fetch("http://localhost:5150/" +
+            (roomCount ? "?roomcount=" + roomCount : ""))
             .then((res) => res.json())
             .then(
                 (result) => {
@@ -34,14 +40,20 @@ class Objective extends React.Component {
                     });
                 }
             );
-        fetch("http://localhost:5150/medians")
-            .then(response => response.json())
+        fetch("http://localhost:5150/filtrValues")
+            .then((res) => res.json())
             .then(
                 (result) => {
                     this.setState({
-                        medians: result
+                        filterValues: result
                     });
-
+                }
+            );
+        fetch("http://localhost:5150/medians" +
+            (roomCount ? "?roomcount=" + roomCount : ""))
+            .then(response => response.json())
+            .then(
+                (result) => {
                     this.setState({
                         options: {
                             ...this.state.options,
@@ -61,30 +73,32 @@ class Objective extends React.Component {
 
                 }
             );
+
     }
 
     render() {
-        const {apartments, medians} = this.state;
+        const {apartments} = this.state;
+
         return <div>
+            Фильтра по колличеству комнат:
+            <select onChange={e => this.setRoomCount(e.target.value)}>
+                <option></option>
+                {this.state.filterValues.map(x =>
+                    <option value={x}>{x}</option>
+                )}
+            </select>
+            <br/>
+            <br/>
+            <br/>
             <div>
+                Квартиры:
                 {
 
                     apartments?.map(x =>
                         <div>
-                            <div>{x.room}</div>
-                            <div>{x.link}</div>
-                            <div>{x.price}</div>
-                        </div>
-                    )
-                }
-            </div>
-            <div>
-                {
-
-                    medians?.map(x =>
-                        <div>
-                            <div>{x.price}</div>
-                            <div>{x.date}</div>
+                            <div>Количество комнат: {x.room}</div>
+                            <div>Ссылка на сайт с описанием: {x.link}</div>
+                            <div>Цена: {x.price}</div>
                         </div>
                     )
                 }
@@ -92,6 +106,12 @@ class Objective extends React.Component {
 
             <ReactApexChart options={this.state.options} series={this.state.series} type="line" height={350}/>
         </div>;
+    }
+
+    setRoomCount(value) {
+        console.log(value)
+
+        this.refreshInfo(value);
     }
 }
 

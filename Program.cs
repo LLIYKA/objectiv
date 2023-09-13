@@ -10,6 +10,7 @@ var app = builder.Build();
 var contro = new Controller();
 app.UseCors(builder => builder.AllowAnyOrigin());
 app.MapGet("/", ([FromQuery] int? roomCount) => contro.Get(roomCount));
+app.MapGet("/filtrValues", () => contro.GetFilterValues());
 app.MapGet("/medians", ([FromQuery] int? roomCount) => contro.GetMedian(roomCount));
 
 app.Run();
