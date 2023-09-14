@@ -6,7 +6,7 @@ namespace Objective;
 class Controller
 {
     private string connectionString =
-        "Persist Security Info=False;User ID=LLIYKA;Password=09051990;Initial Catalog=Objective;Server=192.168.0.100;TrustServerCertificate=true";
+        "Persist Security Info=False;User ID=objective;Password=objective;Initial Catalog=Objective;Server=192.168.0.100;TrustServerCertificate=true";
 
     public Apartment[] Get(int? roomCount)
     {
