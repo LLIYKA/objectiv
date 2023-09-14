@@ -5,70 +5,73 @@ namespace Objective;
 
 class Controller
 {
-    //string connectionString = "Server=(localdb)\\mssqllocaldb;Database=objective;Trusted_Connection=True;";
-    //     using (var connect = new SqlConnection(connectionString))
-    // {
-    //     connect.OpenAsync();
-    //     connect.
-    // }
+    string connectionString = "Server=192.168.0.100;Database=Objective;User Id=objective;Password=objective;";
+
 
     public Apartment[] Get(int? roomCount)
     {
         var apartments = new List<Apartment>();
-        apartments.Add(new Apartment
+        using (var connection = new SqlConnection(connectionString))
         {
-            Room = 1,
-            Price = 1000,
-            Link = "bb?"
-        });
+            connection.Open();
+            SqlCommand command = new SqlCommand(@"SELECT  room, link,
+                (select top 1 price from price_history where id_apartment = apartment.id order by change_date desc) price
+            FROM apartment", connection);
+            var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                apartments.Add(new Apartment
+                {
+                    Room = reader.GetInt32(0),
+                    Link = reader.GetString(1),
+                    Price = reader.GetInt32(2),
+                });
+            }
+        }
+
         return apartments.ToArray();
     }
+
     public int[] GetFilterValues()
     {
         var values = new List<int>();
-        values.Add(1);
-        values.Add(2);
-        values.Add(3);
+        using (var connection = new SqlConnection(connectionString))
+        {
+            connection.Open();
+            SqlCommand command = new SqlCommand("SELECT distinct room FROM apartment order by 1", connection);
+            var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                values.Add(reader.GetInt32(0));
+            }
+        }
+
         return values.ToArray();
     }
 
     public Median[] GetMedian(int? roomCount)
     {
         var medians = new List<Median>();
-        medians.Add(new Median
+        using (var connection = new SqlConnection(connectionString))
         {
-            Date = new DateTime(1990, 01, 01).ToShortDateString(),
-            Price = 100
-        });
-        medians.Add(new Median
-        {
-            Date = new DateTime(1990, 02, 01).ToShortDateString(),
-            Price = 200
-        });
-
-        medians.Add(new Median
-        {
-            Date = new DateTime(1990, 03, 01).ToShortDateString(),
-            Price = 300
-        });
-
-        medians.Add(new Median
-        {
-            Date = new DateTime(1990, 04, 01).ToShortDateString(),
-            Price = 400
-        });
-
-        medians.Add(new Median
-        {
-            Date = new DateTime(1990, 05, 01).ToShortDateString(),
-            Price = 500
-        });
-
-        medians.Add(new Median
-        {
-            Date = new DateTime(1990, 06, 01).ToShortDateString(),
-            Price = 600
-        });
+            connection.Open();
+            SqlCommand command = new SqlCommand(@"SELECT distinct date, PERCENTILE_CONT(0.5) 
+        WITHIN GROUP (ORDER BY price) 
+        OVER (PARTITION BY date)
+        AS Median_UnitPrice
+FROM (SELECT price, CONCAT ( YEAR(change_date),'-',MONTH(change_date))   date  FROM  price_history) AS history",
+                connection);
+            var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                medians.Add(new Median
+                {
+                    Date = reader.GetString(0),
+                    Price = reader.GetInt32(1),
+                   
+                });
+            }
+        }
 
         return medians.ToArray();
     }
