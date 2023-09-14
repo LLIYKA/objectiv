@@ -6,7 +6,7 @@ namespace Objective;
 class Controller
 {
     private string connectionString =
-        "Persist Security Info=False;User ID=*bjective;Password=objective;Initial Catalog=Objective;Server=192.168.0.100";
+        "Persist Security Info=False;User ID=LLIYKA;Password=09051990;Initial Catalog=Objective;Server=192.168.0.100;TrustServerCertificate=true";
 
     public Apartment[] Get(int? roomCount)
     {
@@ -14,9 +14,10 @@ class Controller
         using (var connection = new SqlConnection(connectionString))
         {
             connection.Open();
-            SqlCommand command = new SqlCommand(@"SELECT  room, link,
+            SqlCommand command = new SqlCommand($@"SELECT  room, link,
                 (select top 1 price from price_history where id_apartment = apartment.id order by change_date desc) price
-            FROM apartment", connection);
+            FROM apartment 
+            {(roomCount != null ? " WHERE room = " + roomCount : "")}", connection);
             var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -55,11 +56,12 @@ class Controller
         using (var connection = new SqlConnection(connectionString))
         {
             connection.Open();
-            SqlCommand command = new SqlCommand(@"SELECT distinct date, PERCENTILE_CONT(0.5) 
+            SqlCommand command = new SqlCommand($@"SELECT distinct date, PERCENTILE_CONT(0.5) 
         WITHIN GROUP (ORDER BY price) 
         OVER (PARTITION BY date)
         AS Median_UnitPrice
-FROM (SELECT price, CONCAT ( YEAR(change_date),'-',MONTH(change_date))   date  FROM  price_history) AS history",
+FROM (SELECT price, CONCAT ( YEAR(change_date),'-',MONTH(change_date))   date  FROM  
+price_history {(roomCount != null ? " WHERE id_apartment IN (SELECT ID FROM apartment where room = " + roomCount + ")" : "")} ) AS history",
                 connection);
             var reader = command.ExecuteReader();
             while (reader.Read())
@@ -67,8 +69,7 @@ FROM (SELECT price, CONCAT ( YEAR(change_date),'-',MONTH(change_date))   date  F
                 medians.Add(new Median
                 {
                     Date = reader.GetString(0),
-                    Price = reader.GetInt32(1),
-                   
+                    Price = reader.GetDouble(1),
                 });
             }
         }
@@ -86,6 +87,6 @@ public class Apartment
 
 public class Median
 {
-    public decimal Price { get; set; }
+    public double Price { get; set; }
     public string Date { get; set; }
 }
