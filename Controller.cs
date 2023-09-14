@@ -5,8 +5,8 @@ namespace Objective;
 
 class Controller
 {
-    string connectionString = "Server=192.168.0.100;Database=Objective;User Id=objective;Password=objective;";
-
+    private string connectionString =
+        "Persist Security Info=False;User ID=*bjective;Password=objective;Initial Catalog=Objective;Server=192.168.0.100";
 
     public Apartment[] Get(int? roomCount)
     {
